@@ -197,16 +197,16 @@ void GUI_Main::dropEvent(QDropEvent *Event)
                 if(Error)
                     continue;
 
-                File.From_UTF8(QUrl::fromCFURL(Absurl).toLocalFile().toUtf8().data());
+                File.From_Local(QUrl::fromCFURL(Absurl).toLocalFile().toLocal8Bit().data());
                 CFRelease(Cfurl);
                 CFRelease(Absurl);
             }
             else
             {
-                File.From_UTF8(urls[Pos].toLocalFile().toUtf8().data());
+                File.From_Local(urls[Pos].toLocalFile().toLocal8Bit().data());
             }
 #else
-            File.From_UTF8(urls[Pos].toLocalFile().toUtf8().data());
+            File.From_Local(urls[Pos].toLocalFile().toLocal8Bit().data());
 #endif
 
             #ifdef __WINDOWS__

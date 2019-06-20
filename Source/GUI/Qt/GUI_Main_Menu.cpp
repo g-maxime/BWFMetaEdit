@@ -331,7 +331,7 @@ void GUI_Main::OnMenu_File_Open_Files()
 
     ZenLib::ZtringList FileNames;
     for (int Pos=0; Pos<FileNamesQ.size(); Pos++)
-        FileNames.push_back(ZenLib::Ztring().From_UTF8(FileNamesQ[Pos].toUtf8().data()));
+        FileNames.push_back(ZenLib::Ztring().From_Local(FileNamesQ[Pos].toLocal8Bit().data()));
 
     //Configuring
     C->StdOut("Opening files...");
@@ -369,10 +369,10 @@ void GUI_Main::OnMenu_File_Open_Directory()
     C->StdOut("Opening directory...");
     C->Menu_File_Open_Files_Begin();
     #ifdef _WIN32
-        Ztring Temp; Temp.From_UTF8(FileNamesQ.toUtf8().data()).FindAndReplace("/", "\\", 0, Ztring_Recursive);
+        Ztring Temp; Temp.From_Local(FileNamesQ.toLocal8Bit().data()).FindAndReplace("/", "\\", 0, Ztring_Recursive);
         C->Menu_File_Open_Files_Continue(Temp);
     #else
-        C->Menu_File_Open_Files_Continue(ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data()));
+        C->Menu_File_Open_Files_Continue(ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data()));
     #endif
 
     //Showing
@@ -527,7 +527,7 @@ void GUI_Main::OnMenu_Import_Core_File()
 
     ZenLib::ZtringList FileNames;
     for (int Pos=0; Pos<FileNamesQ.size(); Pos++)
-        FileNames.push_back(ZenLib::Ztring().From_UTF8(FileNamesQ[Pos].toUtf8().data()));
+        FileNames.push_back(ZenLib::Ztring().From_Local(FileNamesQ[Pos].toLocal8Bit().data()));
 
     //Configuring
     C->StdOut("Importing Core file...");
@@ -582,7 +582,7 @@ void GUI_Main::OnMenu_Export_Technical_CSV_Global()
     }
 
     //Configuring
-    C->Out_Tech_CSV_FileName=ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data());
+    C->Out_Tech_CSV_FileName=ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data());
     
     //Running
     C->Simulation_Enabled=true;
@@ -612,7 +612,7 @@ void GUI_Main::OnMenu_Export_Core_CSV_Global()
     }
 
     //Configuring
-    C->Out_Core_CSV_FileName=ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data());
+    C->Out_Core_CSV_FileName=ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data());
     
     //Running
     C->Simulation_Enabled=true;
@@ -642,7 +642,7 @@ void GUI_Main::OnMenu_Export_Core_XML_Global()
     }
 
     //Configuring
-    C->Out_Core_XML_FileName=ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data());
+    C->Out_Core_XML_FileName=ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data());
     
     //Running
     C->Simulation_Enabled=true;

@@ -311,7 +311,7 @@ void GUI_Main_xxxx_CodingHistoryDialog::OnMenu_Load()
         return;
 
     File F;
-    if (!F.Open(ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data())))
+    if (!F.Open(ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data())))
         return;
     int64u F_Size=F.Size_Get();
     if (F_Size>((size_t)-1)-1)
@@ -355,7 +355,7 @@ void GUI_Main_xxxx_CodingHistoryDialog::OnMenu_Save()
         return;
 
     File F;
-    if (!F.Create(ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data())))
+    if (!F.Create(ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data())))
         return;
 
     //Filling

@@ -143,7 +143,7 @@ void GUI_Main_Technical_Table::contextMenuEvent (QContextMenuEvent* Event)
 
         //Filling
         File F;
-        if (!F.Create(ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data())))
+        if (!F.Create(ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data())))
             return;
         F.Write(C->Get(FileName, Field));
         
@@ -160,7 +160,7 @@ void GUI_Main_Technical_Table::contextMenuEvent (QContextMenuEvent* Event)
             return;
 
         File F;
-        if (!F.Open(ZenLib::Ztring().From_UTF8(FileNamesQ.toUtf8().data())))
+        if (!F.Open(ZenLib::Ztring().From_Local(FileNamesQ.toLocal8Bit().data())))
             return;
         int64u F_Size=F.Size_Get();
         if (F_Size>((size_t)-1)-1)
