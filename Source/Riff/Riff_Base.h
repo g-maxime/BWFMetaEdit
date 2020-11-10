@@ -167,6 +167,29 @@ public:
             map<string, string> Strings;
             map<string, ZtringList> Histories;
         };
+        struct chunk_cue_
+        {
+            struct point
+            {
+                int32u          id;
+                int32u          position;
+                int32u          dataChunkId;
+                int32u          chunkStart;
+                int32u          blockStart;
+                int32u          sampleOffset;
+
+                point()
+                {
+                    id=(int32u)-1;
+                    position=(int32u)-1;
+                    dataChunkId=(int32u)-1;
+                    chunkStart=(int32u)-1;
+                    blockStart=(int32u)-1;
+                    sampleOffset=(int32u)-1;
+                }
+            };
+            vector<point> points;
+        };
         struct buffer
         {
             int8u*  Data;
@@ -208,6 +231,8 @@ public:
         chunk_strings      *iXML;
         chunk_strings      *MD5Stored;
         chunk_strings      *MD5Generated;
+        chunk_strings      *cue_;
+        chunk_strings      *adtl;
         bool                NoPadding_Accept;
         bool                NoPadding_IsCorrected;
         bool                NewChunksAtTheEnd;
@@ -236,6 +261,8 @@ public:
              XMP=NULL;
             aXML=NULL;
             iXML=NULL;
+            cue_=NULL;
+            adtl=NULL;
             MD5Stored=NULL;
             MD5Generated=NULL;
             NoPadding_Accept=false;
@@ -263,6 +290,8 @@ public:
             delete  XMP; // XMP=NULL;
             delete aXML; //aXML=NULL;
             delete iXML; //iXML=NULL;
+            delete cue_; //cue_=NULL;
+            delete adtl; //cue_=NULL;
         }
     };
 
