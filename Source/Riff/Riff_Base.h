@@ -167,6 +167,29 @@ public:
             map<string, string> Strings;
             map<string, ZtringList> Histories;
         };
+        struct chunk_cue_
+        {
+            struct point
+            {
+                int32u          id;
+                int32u          position;
+                int32u          dataChunkId;
+                int32u          chunkStart;
+                int32u          blockStart;
+                int32u          sampleOffset;
+
+                point()
+                {
+                    id=(int32u)-1;
+                    position=(int32u)-1;
+                    dataChunkId=(int32u)-1;
+                    chunkStart=(int32u)-1;
+                    blockStart=(int32u)-1;
+                    sampleOffset=(int32u)-1;
+                }
+            };
+            vector<point> points;
+        };
         struct buffer
         {
             int8u*  Data;
