@@ -26,7 +26,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QTabWidget>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QApplication>
 #include <QMessageBox>
 //---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ GUI_Main_xxxx_DateDialog::GUI_Main_xxxx_DateDialog(Core* _C, const std::string &
     Field=Field_;
 
     //Configuration
-    setWindowFlags(windowFlags()&(0xFFFFFFFF-Qt::WindowContextHelpButtonHint));
+    setWindowFlags(windowFlags()&(~Qt::WindowContextHelpButtonHint));
     setWindowTitle(QString::fromUtf8(Field.c_str()));
     setWindowIcon (QIcon(":/Image/Logo/Logo.png"));
 
@@ -143,8 +143,12 @@ GUI_Main_xxxx_DateDialog::GUI_Main_xxxx_DateDialog(Core* _C, const std::string &
     }
     
     //Screen
-    move(QApplication::desktop()->screenGeometry().width()*3/8, QApplication::desktop()->screenGeometry().height()*3/8);
-    resize(QApplication::desktop()->screenGeometry().width()/4, QApplication::desktop()->screenGeometry().height()/4);
+    QScreen* Screen=QApplication::screenAt(mapToGlobal(QPoint(0,0)));
+    if (Screen)
+    {
+        move(Screen->availableGeometry().width()*3/8, Screen->availableGeometry().height()*3/8);
+        resize(Screen->availableGeometry().width()/4, Screen->availableGeometry().height()/4);
+    }
 }
 
 //***************************************************************************
