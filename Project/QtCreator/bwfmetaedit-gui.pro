@@ -170,6 +170,7 @@ macx {
     HEADERS           += ../../Source/Common/Mac_Helpers.h
     OBJECTIVE_SOURCES += ../../Source/Common/Mac_Helpers.mm
     LIBS              += -framework Foundation
+    QMAKE_LIBS_OPENGL  = -framework OpenGL # Fix Xcode 26+ bug
 }
 
 RESOURCES += \
