@@ -7,7 +7,7 @@
 %global bwfmetaedit_version		26.01
 
 # The rust version packaged with these distributions versions is too old to build the C2PA library
-%if (! 0%{?suse_version} || 0%{?suse_version} >= 1507) && (! 0%{?mageia_version} || 0%{?mageia_version} >= 10) && (! 0%{?rhel} || 0%{?rhel} >= 9)
+%if (!0%{?sle_version} || 0%{?sle_version} >= 150700) && (!0%{?mageia} || 0%{?mageia} >= 10) && (!0%{?rhel} || 0%{?rhel} >= 9)
 %global build_c2pa_plugin 1
 %else
 %global build_c2pa_plugin 0
