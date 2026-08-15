@@ -17,7 +17,6 @@ Source0:		bwfmetaedit_%{version}.tar.xz
 Source1:		bwfmetaedit-vendor_%{version}.tar.xz
 Prefix:		%{_prefix}
 BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root
-Requires:		%{name}-plugin-c2pa = %{version}-%{release}
 BuildRequires:	dos2unix
 BuildRequires:	pkgconfig
 BuildRequires:	automake
@@ -42,13 +41,11 @@ Summary:	C2PA (Content Credentials) support library for BWF MetaEdit
 Group:		Productivity/Multimedia/Other
 
 %description plugin-c2pa
-libc2pa_c, built from Source/ThirdParty/c2pa-rs, used by both bwfmetaedit and
-bwfmetaedit-gui to detect, validate and export C2PA (Content Credentials) manifests.
+C2PA Signature, validation and export support.
 
 %package gui
 Summary:	Supplies technical and tag information about a video or audio file (GUI)
 Group:		Productivity/Multimedia/Other
-Requires:	%{name}-plugin-c2pa = %{version}-%{release}
 
 BuildRequires:	pkgconfig(Qt5Gui)
 BuildRequires:	pkgconfig(Qt5Svg)
@@ -101,7 +98,7 @@ popd
 pushd Project/GNU/CLI
 	%__chmod +x autogen
 	./autogen
-	LDFLAGS="$LDFLAGS -Wl,-rpath,%{_libdir}/%{name} -Wl,--allow-shlib-undefined" %configure --enable-c2pa
+	LDFLAGS="$LDFLAGS -Wl,-rpath,%{_libdir}/%{name} -Wl,--allow-shlib-undefined" %configure --enable-c2pa=dynamic
 
 	%__make %{?jobs:-j%{jobs}}
 popd
@@ -109,7 +106,7 @@ popd
 # now build GUI
 pushd Project/QtCreator
 	%__chmod +x prepare
-	./prepare $QMAKEOPTS ENABLE_C2PA=yes QMAKE_RPATHDIR+=%{_libdir}/%{name} QMAKE_LFLAGS+=-Wl,--allow-shlib-undefined BINDIR=%{_bindir}
+	./prepare $QMAKEOPTS ENABLE_C2PA=dynamic QMAKE_RPATHDIR+=%{_libdir}/%{name} QMAKE_LFLAGS+=-Wl,--allow-shlib-undefined BINDIR=%{_bindir}
 
 	%__make %{?jobs:-j%{jobs}}
 popd
