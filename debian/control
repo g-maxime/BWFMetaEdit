@@ -1,15 +1,16 @@
 Source: bwfmetaedit
+Section: libs
 Priority: optional
 Maintainer: Jerome Martinez <info@mediaarea.net>
-Build-Depends: debhelper (>= 5), tofrodos, qtbase5-dev, qtdeclarative5-dev, qtquickcontrols2-5-dev, libqt5svg5-dev, qtchooser, qt5-qmake, qtbase5-dev-tools, pkg-config, automake, autoconf, libtool
-Standards-Version: 3.7.3
-Section: libs
-Homepage: http://mediainfo.sourceforge.net
+Rules-Requires-Root: no
+Build-Depends: debhelper (>= 12), tofrodos, qtbase5-dev, qtdeclarative5-dev, qtquickcontrols2-5-dev, libqt5svg5-dev, qtchooser, qt5-qmake, qtbase5-dev-tools, pkg-config, automake, autoconf, libtool, cargo, rustc
+Standards-Version: 4.6.2
+Homepage: https://mediaarea.net/BWFMetaEdit
 
 Package: bwfmetaedit
 Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, bwfmetaedit-plugin-c2pa (= ${binary:Version})
 Description: BWF MetaEdit provides:
  .
  (To be filled)
@@ -25,10 +26,31 @@ Description: BWF MetaEdit provides:
  .
  This package contains the debugging symbols.
 
+Package: bwfmetaedit-plugin-c2pa
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: C2PA (Content Credentials) support library for BWF MetaEdit
+ .
+ libc2pa_c, built from Source/ThirdParty/c2pa-rs, used by both bwfmetaedit and
+ bwfmetaedit-gui to detect, validate and export C2PA (Content Credentials) manifests.
+
+Package: bwfmetaedit-plugin-c2pa-dbg
+Section: debug
+Architecture: any
+Priority: extra
+Depends: bwfmetaedit-plugin-c2pa (= ${binary:Version})
+Description: C2PA (Content Credentials) support library for BWF MetaEdit
+ .
+ libc2pa_c, built from Source/ThirdParty/c2pa-rs, used by both bwfmetaedit and
+ bwfmetaedit-gui to detect, validate and export C2PA (Content Credentials) manifests.
+ .
+ This package contains the debugging symbols.
+
 Package: bwfmetaedit-gui
 Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}, qml-module-qtquick2, qml-module-qtquick-layouts, qml-module-qtquick-controls2
+Depends: ${shlibs:Depends}, bwfmetaedit-plugin-c2pa (= ${binary:Version}), qml-module-qtquick2, qml-module-qtquick-layouts, qml-module-qtquick-controls2
 Description: BWF MetaEdit provides:
  .
  (To be filled)

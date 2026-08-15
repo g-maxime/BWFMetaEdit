@@ -5,6 +5,14 @@
 export DH_VERBOSE=1
 export QT_SELECT=qt5
 
+C2PA_LIBDIR := /usr/lib/bwfmetaedit
+
+# OBS build workers have no network access, so `cargo build` can't fetch crates.io
+# dependencies there. Release/Release_Source.sh pre-vendors them (with network, on a
+# developer machine) into this tarball, staged next to the source tree by
+# Release_OBS.sh.
+VENDOR_TARBALL := $(firstword $(wildcard $(CURDIR)/../bwfmetaedit-vendor_*.tar.xz) $(wildcard $(CURDIR)/bwfmetaedit-vendor_*.tar.xz))
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -12,11 +20,24 @@ configure-stamp:
 
 	fromdos      *.txt
 	chmod 644    *.txt
+
+	test -n "$(VENDOR_TARBALL)" # bwfmetaedit-vendor_*.tar.xz not found next to the source tree
+	rm -rf Source/ThirdParty/c2pa-rs/vendor
+	tar -xf $(VENDOR_TARBALL) -C Source/ThirdParty/c2pa-rs
+	mkdir -p Source/ThirdParty/c2pa-rs/.cargo
+	printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' \
+		> Source/ThirdParty/c2pa-rs/.cargo/config.toml
+	cd Source/ThirdParty/c2pa-rs && \
+		CARGO_HOME=$(CURDIR)/debian/cargo_home CARGO_NET_OFFLINE=true \
+		cargo build --release --offline --locked -p c2pa-c-ffi \
+			--no-default-features --features "rust_native_crypto, http, file_io"
+	strip Source/ThirdParty/c2pa-rs/target/release/libc2pa_c.so
+
 	cd Project/GNU/CLI && chmod u+x autogen
 	cd Project/GNU/CLI && ./autogen
-	cd Project/GNU/CLI && ./configure --prefix=/usr
+	cd Project/GNU/CLI && LDFLAGS="$(LDFLAGS) -Wl,-rpath,$(C2PA_LIBDIR) -Wl,--allow-shlib-undefined" ./configure --prefix=/usr --enable-c2pa
 
-	cd Project/QtCreator && ./prepare BINDIR=/usr/bin
+	cd Project/QtCreator && ./prepare ENABLE_C2PA=yes QMAKE_RPATHDIR+=$(C2PA_LIBDIR) QMAKE_LFLAGS+=-Wl,--allow-shlib-undefined BINDIR=/usr/bin
 
 	touch $@
 
@@ -44,12 +65,15 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp
 	cd Project/GNU/CLI && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 	cd Project/QtCreator && $(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/tmp
+
+	install -dm 755 $(CURDIR)/debian/tmp$(C2PA_LIBDIR)
+	install -m 755 Source/ThirdParty/c2pa-rs/target/release/libc2pa_c.so $(CURDIR)/debian/tmp$(C2PA_LIBDIR)/libc2pa_c.so
 
 	install -dm 755 $(CURDIR)/debian/tmp/usr/share/doc/bwfmetaedit
 	install -m 644 Release/ReadMe_CLI_Linux.txt $(CURDIR)/debian/tmp/usr/share/doc/bwfmetaedit/ReadMe.txt
@@ -104,14 +128,18 @@ binary-arch: build install
 	dh_installman
 	dh_link
 	dh_strip -p bwfmetaedit --dbg-package=bwfmetaedit-dbg
+	dh_strip -p bwfmetaedit-plugin-c2pa --dbg-package=bwfmetaedit-plugin-c2pa-dbg
 	dh_strip -p bwfmetaedit-gui --dbg-package=bwfmetaedit-gui-dbg
 	dh_compress
 	dh_fixperms
 #	dh_perl
 #	dh_python
-	dh_makeshlibs
+	dh_makeshlibs -X$(C2PA_LIBDIR)
 	dh_installdeb
-	dh_shlibdeps
+	# libc2pa_c.so carries no SONAME (typical for a Rust cdylib) and is a private,
+	# package-internal dependency, so dpkg-shlibdeps can't compute real dependency
+	# information for it; point it at the lib and tell it not to fail on that.
+	dh_shlibdeps -- -l$(CURDIR)/debian/bwfmetaedit-plugin-c2pa$(C2PA_LIBDIR) --ignore-missing-info
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
