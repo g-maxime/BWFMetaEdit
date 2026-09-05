@@ -4,6 +4,11 @@ Notes:
 - Deleted
 x Correction
 
+Version 26.08.1, 2026-09-05
+-------------
++ C2PA system and user anchors support
+x C2PA Fix wrong chunk detection in GUI
+
 Version 26.08, 2026-08-27
 -------------
 + C2PA read and write
