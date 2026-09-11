@@ -18,6 +18,7 @@ version="$(<"${release_directory}/../Project/version.txt")"
 mkdir "${release_directory}/obs"
 
 cp "${release_directory}/../Project/OBS/bwfmetaedit.spec" "${release_directory}/obs/"
+cp "${release_directory}/../Project/OBS/bwfmetaedit.changes" "${release_directory}/obs/"
 cp "${release_directory}/../Project/OBS/bwfmetaedit.dsc" "${release_directory}/obs/"
 cp "${release_directory}/../Project/OBS/PKGBUILD" "${release_directory}/obs/"
 

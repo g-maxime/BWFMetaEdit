@@ -27,3 +27,9 @@ Project/MSVC2022/Win32
 Project/MSVC2022/x64
 Project/MSVC2022/CLI/Win32
 Project/MSVC2022/CLI/x64
+Project/CMake/CLI/build
+Project/CMake/GUI/build
+Project/CMake/CLI/Win32
+Project/CMake/CLI/x64
+Project/CMake/GUI/Win32
+Project/CMake/GUI/x64

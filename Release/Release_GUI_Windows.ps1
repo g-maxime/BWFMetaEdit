@@ -45,7 +45,7 @@ Push-Location "${release_directory}"
     New-Item -Force -ItemType Directory -Path "BWFMetaEdit_GUI_${version}_Windows_${arch_alt}"
     Push-Location "BWFMetaEdit_GUI_${version}_Windows_${arch_alt}"
         ### Copying: Exe ###
-        Copy-Item -Force "..\..\Project\QtCreator\${arch}\BWF MetaEdit.exe" bwfmetaedit-gui.exe
+        Copy-Item -Force "..\..\Project\CMake\GUI\${arch}\BWF MetaEdit.exe" bwfmetaedit-gui.exe
         ### Copying: DLLs ###
         Copy-Item -Force "..\..\Source\ThirdParty\c2pa-rs\target\${arch_c2pa}-pc-windows-msvc\release\c2pa_c.dll" .
         ### Copying: Information files ###

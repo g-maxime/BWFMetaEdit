@@ -13,7 +13,13 @@
 %global build_c2pa_plugin 0
 %endif
 
-%if 0%{?suse_version} || 0%{?mageia} || (0%{?rhel} > 9) || 0%{?fedora_version}
+%if %{build_c2pa_plugin}
+%global c2pa_cmake_flags -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES
+%else
+%global c2pa_cmake_flags %{nil}
+%endif
+
+%if 0%{?suse_version} > 1599 || 0%{?mageia} || 0%{?rhel} > 9 || 0%{?fedora_version}
 %global qt6_gui 1
 %else
 %global qt6_gui 0
@@ -32,8 +38,12 @@ Prefix:		%{_prefix}
 BuildRoot:		%{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires:	dos2unix
 BuildRequires:	pkgconfig
-BuildRequires:	automake
-BuildRequires:	autoconf
+BuildRequires:	cmake
+%if 0%{?suse_version} || 0%{?mageia}
+BuildRequires:	ninja
+%else
+BuildRequires:	ninja-build
+%endif
 BuildRequires:	gcc-c++
 %if %{build_c2pa_plugin}
 BuildRequires:	cargo
@@ -122,7 +132,6 @@ EOF
 %build
 export CFLAGS="-g $RPM_OPT_FLAGS"
 export CXXFLAGS="-g $RPM_OPT_FLAGS"
-export QMAKEOPTS="CONFIG+=force_debug_info"
 
 %if %{build_c2pa_plugin}
 # build c2pa-rs (offline, from the vendored dependencies unpacked during prep)
@@ -136,40 +145,20 @@ popd
 %endif
 
 # build CLI
-pushd Project/GNU/CLI
-	%__chmod +x autogen
-	./autogen
-	%if %{build_c2pa_plugin}
-	LDFLAGS="$LDFLAGS -Wl,-rpath,%{_libdir}/%{name}" %configure --enable-c2pa=dynamic
-	%else
-	%configure
-	%endif
-	%__make %{?jobs:-j%{jobs}}
-popd
+cmake -GNinja -SProject/CMake/CLI -BProject/CMake/CLI/build \
+	-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+	-DCMAKE_INSTALL_RPATH=%{_libdir}/%{name} %{c2pa_cmake_flags}
+cmake --build Project/CMake/CLI/build %{?jobs:--parallel %{jobs}}
 
-# now build GUI
-pushd Project/QtCreator
-	%if %{build_c2pa_plugin}
-	QMAKE_ARGS="$QMAKEOPTS ENABLE_C2PA=dynamic QMAKE_RPATHDIR+=%{_libdir}/%{name} BINDIR=%{_bindir}"
-	%else
-	QMAKE_ARGS="$QMAKEOPTS BINDIR=%{_bindir}"
-	%endif
-	%if %{qt6_gui}
-	qmake6 $QMAKE_ARGS
-	%else
-	qmake-qt5 $QMAKE_ARGS
-	%endif
-	%__make %{?jobs:-j%{jobs}}
-popd
+# build GUI
+cmake -GNinja -SProject/CMake/GUI -BProject/CMake/GUI/build \
+	-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%{_prefix} \
+	-DCMAKE_INSTALL_RPATH=%{_libdir}/%{name} %{c2pa_cmake_flags}
+cmake --build Project/CMake/GUI/build %{?jobs:--parallel %{jobs}}
 
 %install
-pushd Project/GNU/CLI
-	%__make install DESTDIR=%{buildroot}
-popd
-
-pushd Project/QtCreator
-	%__make install INSTALL_ROOT=%{buildroot}
-popd
+DESTDIR=%{buildroot} cmake --install Project/CMake/CLI/build
+DESTDIR=%{buildroot} cmake --install Project/CMake/GUI/build
 
 %if %{build_c2pa_plugin}
 %__install -dm 755 %{buildroot}%{_libdir}/%{name}

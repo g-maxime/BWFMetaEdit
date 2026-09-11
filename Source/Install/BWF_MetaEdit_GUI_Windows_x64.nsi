@@ -84,7 +84,7 @@ Section "SectionPrincipale" SEC01
 
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME_EXE}" "" "" "" "" "" "${PRODUCT_NAME} ${PRODUCT_VERSION}"
   SetOutPath "$INSTDIR"
-  File "/oname=${PRODUCT_NAME_EXE}" "..\..\Project\QtCreator\x64\${PRODUCT_NAME_EXE}"
+  File "/oname=${PRODUCT_NAME_EXE}" "..\..\Project\CMake\GUI\x64\${PRODUCT_NAME_EXE}"
   File "..\..\Source\ThirdParty\c2pa-rs\target\x86_64-pc-windows-msvc\release\c2pa_c.dll"
   File "/oname=History.txt" "..\..\History_GUI.txt"
   File "..\..\License.html"
