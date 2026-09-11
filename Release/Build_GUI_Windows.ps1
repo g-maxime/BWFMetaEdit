@@ -40,10 +40,10 @@ if (-Not (Test-Path -Path "${release_directory}\..\Source\ThirdParty\c2pa-rs\tar
 
 #-----------------------------------------------------------------------
 # Build
-Push-Location -Path "${release_directory}\..\Project\QtCreator"
+Push-Location -Path "${release_directory}\..\Project\CMake\GUI"
     New-Item -Force -ItemType Directory "${arch}"
     Push-Location -Path "${arch}"
-        qmake ENABLE_C2PA=dynamic ..
-        nmake
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES ..
+        cmake --build .
     Pop-Location
 Pop-Location
