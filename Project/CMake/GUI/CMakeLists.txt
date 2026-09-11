@@ -11,9 +11,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 if(APPLE)
-    if(NOT CMAKE_OSX_ARCHITECTURES)
-        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-    endif()
     enable_language(OBJCXX)
 endif()
 
@@ -195,9 +192,9 @@ if(APPLE)
     list(APPEND HEADERS ${SOURCE_DIR}/Common/Mac_Helpers.h)
 endif()
 
-# The logical target name stays a plain identifier (some generators, e.g.
-# Xcode/Visual Studio, don't cope well with spaces there); the "BWF MetaEdit"
-# display name from the .pro file is applied below via OUTPUT_NAME instead.
+# The target name stays a plain identifier as some generators (e.g.
+# Xcode or Visual Studio) don't like spaces there, the full
+# "BWF MetaEdit" display name is applied below via OUTPUT_NAME instead.
 set(TARGET_NAME bwfmetaedit-gui)
 
 if(WIN32)
@@ -258,8 +255,6 @@ if(ENABLE_C2PA)
 endif()
 
 if(UNIX AND NOT APPLE)
-    if(NOT DEFINED BINDIR)
-        set(BINDIR "/usr/bin" CACHE PATH "Executable install directory")
-    endif()
-    install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${BINDIR})
+    include(GNUInstallDirs)
+    install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()

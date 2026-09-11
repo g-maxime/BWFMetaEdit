@@ -10,10 +10,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-if(APPLE AND NOT CMAKE_OSX_ARCHITECTURES)
-    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-endif()
-
 option(ENABLE_C2PA "Enable C2PA support" OFF)
 option(C2PA_DYNAMIC "Load the C2PA library dynamically at runtime" OFF)
 

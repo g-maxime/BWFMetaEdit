@@ -4,7 +4,10 @@
 ##  be found in the License.html file in the root of the source tree.
 ##
 
-Param([parameter(Mandatory=$true)][String]$arch)
+Param(
+    [parameter(Mandatory=$true)][String]$arch,
+    [parameter(Mandatory=$false)][String]$runtime
+)
 
 $ErrorActionPreference = "Stop"
 
@@ -43,7 +46,7 @@ if (-Not (Test-Path -Path "${release_directory}\..\Source\ThirdParty\c2pa-rs\tar
 Push-Location -Path "${release_directory}\..\Project\CMake\GUI"
     New-Item -Force -ItemType Directory "${arch}"
     Push-Location -Path "${arch}"
-        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES ..
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES $($runtime ? "-DCMAKE_RUNTIME_LIBRARY=$runtime" : "") ..
         cmake --build .
     Pop-Location
 Pop-Location
