@@ -48,10 +48,7 @@ cp Logo_White.icns "${FILES}/.background"
 
 if [ "$KIND" = "CLI" ]; then
 
-    cd ../GNU/CLI
-    if test -e ".libs/${APPNAME_lower}"; then
-        mv -f ".libs/${APPNAME_lower}" .
-    fi
+    cd ../CMake/CLI/build
     if ! test -x "${APPNAME_lower}"; then
         echo
         echo "${APPNAME_lower} can’t be found, or this file isn’t a executable."
@@ -59,10 +56,10 @@ if [ "$KIND" = "CLI" ]; then
         exit 1
     fi
     strip -u -r "${APPNAME_lower}"
-    cd ../../Mac
+    cd ../../../Mac
 
     mkdir -p "${FILES}-Root/usr/local/bin"
-    cp "../GNU/CLI/${APPNAME_lower}" "${FILES}-Root/usr/local/bin"
+    cp "../CMake/CLI/build/${APPNAME_lower}" "${FILES}-Root/usr/local/bin"
     codesign -f --deep --options=runtime -s "Developer ID Application: ${SIGNATURE}" --verbose "${FILES}-Root/usr/local/bin/${APPNAME_lower}"
 
     mkdir -p "${FILES}-Root/usr/local/lib/${APPNAME_lower}/lib"
@@ -76,16 +73,16 @@ fi
 
 if [ "$KIND" = "GUI" ]; then
 
-    cd ../QtCreator
+    cd ../CMake/GUI/build
     if ! test -e "${APPNAME}.app"; then
         echo
         echo "${APPNAME}.app can’t be found, or this file isn’t a executable."
         echo
         exit 1
     fi
-    cd ../Mac
+    cd ../../../Mac
 
-    cp -r "../QtCreator/${APPNAME}.app" "${FILES}"
+    cp -r "../CMake/GUI/build/${APPNAME}.app" "${FILES}"
 
     macdeployqt "${FILES}/${APPNAME}.app"
 

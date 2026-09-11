@@ -55,6 +55,8 @@ done
 files_rc=(
     "${release_directory}/../Project/MSVC2022/CLI/BWF_MetaEdit_CLI.rc"
     "${release_directory}/../Project/QtCreator/bwfmetaedit-gui.rc"
+    "${release_directory}/../Project/CMake/CLI/bwfmetaedit.rc"
+    "${release_directory}/../Project/CMake/GUI/bwfmetaedit-gui.rc"
 )
 
 for file in "${files_rc[@]}" ; do

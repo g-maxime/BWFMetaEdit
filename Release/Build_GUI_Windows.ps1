@@ -4,7 +4,10 @@
 ##  be found in the License.html file in the root of the source tree.
 ##
 
-Param([parameter(Mandatory=$true)][String]$arch)
+Param(
+    [parameter(Mandatory=$true)][String]$arch,
+    [parameter(Mandatory=$false)][String]$runtime
+)
 
 $ErrorActionPreference = "Stop"
 
@@ -40,10 +43,11 @@ if (-Not (Test-Path -Path "${release_directory}\..\Source\ThirdParty\c2pa-rs\tar
 
 #-----------------------------------------------------------------------
 # Build
-Push-Location -Path "${release_directory}\..\Project\QtCreator"
-    New-Item -Force -ItemType Directory "${arch}"
-    Push-Location -Path "${arch}"
-        qmake ENABLE_C2PA=dynamic ..
-        nmake
-    Pop-Location
+Push-Location -Path "${release_directory}\..\Project\CMake\GUI"
+    $cmake_args = @("-GNinja", "-B${arch}", "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_C2PA=YES", "-DC2PA_DYNAMIC=YES")
+    if ($runtime) {
+        $cmake_args += "-DCMAKE_MSVC_RUNTIME_LIBRARY=${runtime}"
+    }
+    cmake @cmake_args .
+    cmake --build "${arch}" --parallel
 Pop-Location

@@ -9,15 +9,12 @@ C2PA_LIBDIR := /usr/lib/bwfmetaedit
 # Qt6 dev packages only exist from Debian 12 (bookworm) onward (debian/control
 # build-depends on them with a Qt5 fallback for Debian 11/bullseye), so detect
 # at build time which flavour actually got installed.
-HAVE_QT6 := $(shell command -v qmake6 >/dev/null 2>&1 && echo yes)
+HAVE_QT6 := $(shell pkg-config --exists Qt6Core >/dev/null 2>&1 && echo yes)
 
 ifeq ($(HAVE_QT6),yes)
-QMAKE := qmake6
 QML_DEPENDS := qml6-module-qtquick, qml6-module-qtquick-window, qml6-module-qtquick-controls, qml6-module-qtquick-templates, qml6-module-qtquick-layouts, qml6-module-qtqml, qml6-module-qtqml-models, qml6-module-qtqml-workerscript
 else
-QMAKE := qmake
 QML_DEPENDS := qml-module-qtquick2, qml-module-qtquick-window2, qml-module-qtquick-layouts, qml-module-qtquick-controls2, qml-module-qtquick-templates2, qml-module-qtqml, qml-module-qtqml-models2, qml-module-qtqml-workerscript2
-export QT_SELECT=qt5
 endif
 
 # The C2PA plugin is only built when the rustc actually installed is new
@@ -30,12 +27,10 @@ RUSTC_VERSION := $(shell rustc --version 2>/dev/null | sed -n 's/^rustc \([0-9][
 HAVE_C2PA := $(shell [ -n "$(RUSTC_VERSION)" ] && dpkg --compare-versions "$(RUSTC_VERSION)" ge "$(C2PA_MIN_RUSTC_VERSION)" && echo yes)
 
 ifeq ($(HAVE_C2PA),yes)
-CONFIGURE_C2PA_FLAGS := --enable-c2pa=dynamic
-PREPARE_C2PA_FLAGS := ENABLE_C2PA=dynamic
+CMAKE_C2PA_FLAGS := -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES -DCMAKE_INSTALL_RPATH=$(C2PA_LIBDIR)
 C2PA_EXCLUDE :=
 else
-CONFIGURE_C2PA_FLAGS :=
-PREPARE_C2PA_FLAGS :=
+CMAKE_C2PA_FLAGS :=
 C2PA_EXCLUDE := -N bwfmetaedit-plugin-c2pa -N bwfmetaedit-plugin-c2pa-dbg
 endif
 
@@ -63,11 +58,11 @@ ifeq ($(HAVE_C2PA),yes)
 	strip Source/ThirdParty/c2pa-rs/target/release/libc2pa_c.so
 endif
 
-	cd Project/GNU/CLI && chmod u+x autogen
-	cd Project/GNU/CLI && ./autogen
-	cd Project/GNU/CLI && LDFLAGS="$(LDFLAGS) -Wl,-rpath,$(C2PA_LIBDIR) -Wl,--allow-shlib-undefined" ./configure --prefix=/usr $(CONFIGURE_C2PA_FLAGS)
+	cmake -GNinja -SProject/CMake/CLI -BProject/CMake/CLI/build \
+		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr $(CMAKE_C2PA_FLAGS)
 
-	cd Project/QtCreator && $(QMAKE) $(PREPARE_C2PA_FLAGS) QMAKE_RPATHDIR+=$(C2PA_LIBDIR) QMAKE_LFLAGS+=-Wl,--allow-shlib-undefined BINDIR=/usr/bin
+	cmake -GNinja -SProject/CMake/GUI -BProject/CMake/GUI/build \
+		-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr $(CMAKE_C2PA_FLAGS)
 
 	touch $@
 
@@ -75,11 +70,10 @@ endif
 build: build-stamp
 build-stamp: configure-stamp
 	dh_testdir
-
 	# Add here commands to compile the package.
-	cd Project/GNU/CLI && $(MAKE)
 
-	cd Project/QtCreator && $(MAKE)
+	cmake --build Project/CMake/CLI/build --parallel
+	cmake --build Project/CMake/GUI/build --parallel
 
 	touch $@
 
@@ -99,8 +93,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp
-	cd Project/GNU/CLI && $(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
-	cd Project/QtCreator && $(MAKE) install INSTALL_ROOT=$(CURDIR)/debian/tmp
+	DESTDIR=$(CURDIR)/debian/tmp cmake --install Project/CMake/CLI/build
+	DESTDIR=$(CURDIR)/debian/tmp cmake --install Project/CMake/GUI/build
 
 ifeq ($(HAVE_C2PA),yes)
 	install -dm 755 $(CURDIR)/debian/tmp$(C2PA_LIBDIR)
