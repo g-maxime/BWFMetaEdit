@@ -37,11 +37,11 @@ popd
 
 #-----------------------------------------------------------------------
 # Build BWF MetaEdit
-pushd "${release_directory}/../Project/QtCreator"
-    qmake ENABLE_C2PA=dynamic
-    make
-    if ! otool -l "BWF MetaEdit.app/Contents/MacOS/BWF MetaEdit" | grep -q "@executable_path/../Frameworks" ; then
-        install_name_tool -add_rpath "@executable_path/../Frameworks" "BWF MetaEdit.app/Contents/MacOS/BWF MetaEdit"
+pushd "${release_directory}/../Project/CMake/GUI"
+    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="${macosx_version_min}" -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES .
+    cmake --build build --parallel
+    if ! otool -l "build/BWF MetaEdit.app/Contents/MacOS/BWF MetaEdit" | grep -q "@executable_path/../Frameworks" ; then
+        install_name_tool -add_rpath "@executable_path/../Frameworks" "build/BWF MetaEdit.app/Contents/MacOS/BWF MetaEdit"
     fi
 popd
 

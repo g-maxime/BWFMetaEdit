@@ -37,12 +37,11 @@ popd
 
 #-----------------------------------------------------------------------
 # Build bwfmetaedit
-pushd "${release_directory}/../Project/GNU/CLI"
-    ./autogen.sh
-    ./configure --enable-arch-x86_64 --enable-arch-arm64 --enable-c2pa=dynamic --with-macosx-version-min="${macosx_version_min}"
-    make
+pushd "${release_directory}/../Project/CMake/CLI"
+    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="${macosx_version_min}" -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES .
+    cmake --build build --parallel
 
-    install_name_tool -add_rpath /usr/local/lib/bwfmetaedit/lib bwfmetaedit
+    install_name_tool -add_rpath /usr/local/lib/bwfmetaedit/lib build/bwfmetaedit
 popd
 
 #-----------------------------------------------------------------------
