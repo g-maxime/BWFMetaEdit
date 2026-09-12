@@ -25,7 +25,7 @@ option(MACSTORE "Build for the Mac App Store" OFF)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Quick QuickWidgets Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Quick QuickWidgets QuickControls2 Svg)
 
 set(HEADERS
     ${SOURCE_DIR}/Common/Common_About.h
@@ -237,8 +237,39 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::QuickWidgets
+    Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::Svg
 )
+
+# PerFile.qml (loaded as qrc:/PerFile.qml) imports QtQuick, QtQuick.Controls and its
+# Material style, and QtQuick.Layouts. A shared Qt build resolves those QML plugins at
+# runtime, but a static Qt build has to import and link them into the executable;
+# otherwise QQuickWidget cannot instantiate the QML and the PerFile view stays empty.
+# qmake does this on its own for static builds (mkspecs/features/qt.prf runs
+# qmlimportscanner over the .qrc and generates qml_plugin_import.cpp).
+get_target_property(_qt_core_type Qt${QT_VERSION_MAJOR}::Core TYPE)
+if(_qt_core_type STREQUAL "STATIC_LIBRARY")
+    if(QT_VERSION_MAJOR EQUAL 6)
+        # Qt6 does the static-plugin equivalent for targets linking Qt::Qml on its own;
+        # this target uses plain add_executable() rather than qt_add_executable(), so the
+        # automatic finalizer never runs and this explicit call is required.
+        if(COMMAND qt_import_qml_plugins)
+            qt_import_qml_plugins(${TARGET_NAME})
+        endif()
+    else()
+        # Qt5 has no automatic equivalent, so go through its own qmlimportscanner-based
+        # CMake integration: find_package(Qt5 COMPONENTS QmlImportScanner) defines
+        # qt5_import_qml_plugins(), which scans this target's .qrc for QML files,
+        # resolves each plugin via its .prl file, and links it in.
+        find_package(Qt5 COMPONENTS QmlImportScanner QUIET)
+        if(COMMAND qt5_import_qml_plugins)
+            qt5_import_qml_plugins(${TARGET_NAME})
+        else()
+            message(FATAL_ERROR "Qt5QmlImportScanner not found; a static build will not render PerFile.qml")
+        endif()
+    endif()
+endif()
+unset(_qt_core_type)
 
 if(ENABLE_C2PA)
     target_compile_definitions(${TARGET_NAME} PRIVATE ENABLE_C2PA)
