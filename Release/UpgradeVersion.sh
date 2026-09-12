@@ -39,7 +39,7 @@ files_dot=(
     "${release_directory}/../Project/OBS/bwfmetaedit.spec"
     "${release_directory}/../Project/OBS/bwfmetaedit.dsc"
     "${release_directory}/../Project/OBS/PKGBUILD"
-    "${release_directory}/../Project/GNU/GUI/bwfmetaedit-gui.metainfo.xml"
+    "${release_directory}/../Project/Unix/bwfmetaedit-gui.metainfo.xml"
     "${release_directory}/../Project/Mac/Info.plist"
     "${release_directory}/../Source/Common/Common_About.cpp"
     "${release_directory}/../Source/Install/BWF_MetaEdit_GUI_Windows_i386.nsi"
@@ -84,7 +84,7 @@ fi
 #-----------------------------------------------------------------------
 # Processing metainfo.xml date
 date_YYYY_MM_DD="$(LC_ALL=C date -u +%Y-%m-%d)"
-sed -i "s/date=\"[0-9-]\+\"/date=\"${date_YYYY_MM_DD}\"/g" "${release_directory}/../Project/GNU/GUI/bwfmetaedit-gui.metainfo.xml"
+sed -i "s/date=\"[0-9-]\+\"/date=\"${date_YYYY_MM_DD}\"/g" "${release_directory}/../Project/Unix/bwfmetaedit-gui.metainfo.xml"
 
 #-----------------------------------------------------------------------
 # Update changelogs

@@ -187,22 +187,22 @@ popd
 
 # menu-entry
 %__install -dm 755 %{buildroot}/%{_datadir}/applications
-%__install -m 644 Project/GNU/GUI/bwfmetaedit-gui.desktop \
+%__install -m 644 Project/Unix/bwfmetaedit-gui.desktop \
 	%{buildroot}/%{_datadir}/applications
 %if 0%{?suse_version}
   %suse_update_desktop_file -n bwfmetaedit-gui AudioVideo AudioVideoEditing
 %endif
 %__install -dm 755 %{buildroot}/%{_datadir}/apps/konqueror/servicemenus
-%__install -m 644 Project/GNU/GUI/bwfmetaedit-gui.kde3.desktop \
+%__install -m 644 Project/Unix/bwfmetaedit-gui.kde3.desktop \
 	%{buildroot}/%{_datadir}/apps/konqueror/servicemenus/bwfmetaedit-gui.desktop
 %if 0%{?suse_version}
   %suse_update_desktop_file -n %{buildroot}/%{_datadir}/apps/konqueror/servicemenus/bwfmetaedit-gui.desktop AudioVideo AudioVideoEditing
 %endif
 %__install -dm 755 %{buildroot}/%{_datadir}/kde4/services/ServiceMenus/
-%__install -m 644 Project/GNU/GUI/bwfmetaedit-gui.kde4.desktop \
+%__install -m 644 Project/Unix/bwfmetaedit-gui.kde4.desktop \
 	%{buildroot}/%{_datadir}/kde4/services/ServiceMenus/bwfmetaedit-gui.desktop
 %__install -dm 755 %{buildroot}/%{_datadir}/kservices5/ServiceMenus/
-%__install -m 644 Project/GNU/GUI/bwfmetaedit-gui.kde4.desktop \
+%__install -m 644 Project/Unix/bwfmetaedit-gui.kde4.desktop \
 	%{buildroot}/%{_datadir}/kservices5/ServiceMenus/bwfmetaedit-gui.desktop
 %if 0%{?suse_version}
   %suse_update_desktop_file -n %{buildroot}/%{_datadir}/kde4/services/ServiceMenus/bwfmetaedit-gui.desktop AudioVideo AudioVideoEditing
@@ -210,10 +210,10 @@ popd
 %endif
 %if 0%{?fedora_version}
 install -dm 755 %{buildroot}%{_datadir}/metainfo/
-install -m 644 Project/GNU/GUI/bwfmetaedit-gui.metainfo.xml %{buildroot}%{_datadir}/metainfo/bwfmetaedit-gui.metainfo.xml
+install -m 644 Project/Unix/bwfmetaedit-gui.metainfo.xml %{buildroot}%{_datadir}/metainfo/bwfmetaedit-gui.metainfo.xml
 %else
 install -dm 755 %{buildroot}%{_datadir}/appdata/
-install -m 644 Project/GNU/GUI/bwfmetaedit-gui.metainfo.xml %{buildroot}%{_datadir}/appdata/bwfmetaedit-gui.appdata.xml
+install -m 644 Project/Unix/bwfmetaedit-gui.metainfo.xml %{buildroot}%{_datadir}/appdata/bwfmetaedit-gui.appdata.xml
 %endif
 
 %clean
