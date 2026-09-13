@@ -21,8 +21,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 option(ENABLE_C2PA "Enable C2PA support" OFF)
 option(C2PA_DYNAMIC "Load the C2PA library dynamically at runtime" OFF)
 option(MACSTORE "Build for the Mac App Store" OFF)
+option(WIN32_CONSOLE "On Windows, build as a console app so qWarning/qDebug show up when run from a terminal" OFF)
 
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source)
+get_filename_component(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../Source" ABSOLUTE)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets Quick QuickWidgets QuickControls2 Svg)
@@ -169,45 +170,48 @@ if(ENABLE_C2PA)
         ${SOURCE_DIR}/Riff/Riff_C2PA_Helpers.cpp
         ${SOURCE_DIR}/GUI/Qt/GUI_Main_xxxx_C2PADialog.cpp
     )
+
     list(APPEND HEADERS
         ${SOURCE_DIR}/ThirdParty/json/json.h
         ${SOURCE_DIR}/Riff/Riff_C2PA_Helpers.h
         ${SOURCE_DIR}/GUI/Qt/GUI_Main_xxxx_C2PADialog.h
     )
-endif()
 
-if(WIN32)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-        set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/i686-pc-windows-msvc/release)
+    if(WIN32)
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/i686-pc-windows-msvc/release)
+        else()
+            set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/x86_64-pc-windows-msvc/release)
+        endif()
     else()
-        set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/x86_64-pc-windows-msvc/release)
+        set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/release)
     endif()
-else()
-    set(C2PA_TARGET_DIR ${SOURCE_DIR}/ThirdParty/c2pa-rs/target/release)
 endif()
 
 if(APPLE)
-    set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/../../Mac/Logo.icns)
+    set(APP_ICON ${SOURCE_DIR}/../Project/Mac/Logo.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    list(APPEND SOURCES ${SOURCE_DIR}/Common/Mac_Helpers.mm)
     list(APPEND HEADERS ${SOURCE_DIR}/Common/Mac_Helpers.h)
 endif()
 
 # The target name stays a plain identifier as some generators (e.g.
 # Xcode or Visual Studio) don't like spaces there, the full
-# "BWF MetaEdit" display name is applied below via OUTPUT_NAME instead.
+# "BWF MetaEdit" output name is applied below via OUTPUT_NAME instead.
 set(TARGET_NAME bwfmetaedit-gui)
 
 if(WIN32)
     add_executable(${TARGET_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../QtCreator/bwfmetaedit-gui.rc)
+        ${SOURCE_DIR}/../Project/QtCreator/bwfmetaedit-gui.rc)
     set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME "BWF MetaEdit")
+    if(WIN32_CONSOLE)
+        set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE FALSE)
+    endif()
 elseif(APPLE)
-    add_executable(${TARGET_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES}
-        ${SOURCE_DIR}/Common/Mac_Helpers.mm ${APP_ICON})
-    set_source_files_properties(${SOURCE_DIR}/Common/Mac_Helpers.mm PROPERTIES LANGUAGE OBJCXX)
+    add_executable(${TARGET_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${APP_ICON})
     set_target_properties(${TARGET_NAME} PROPERTIES
         OUTPUT_NAME "BWF MetaEdit"
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/../../Mac/Info.plist
+        MACOSX_BUNDLE_INFO_PLIST ${SOURCE_DIR}/../Project/Mac/Info.plist
         MACOSX_BUNDLE_ICON_FILE Logo.icns
     )
     target_link_libraries(${TARGET_NAME} PRIVATE "-framework CoreFoundation" "-framework Foundation")
@@ -226,50 +230,10 @@ target_compile_definitions(${TARGET_NAME} PRIVATE
     QT_NO_KEYWORDS
 )
 
-if(MACSTORE AND APPLE)
+if(APPLE AND MACSTORE)
     target_compile_definitions(${TARGET_NAME} PRIVATE MACSTORE)
     target_compile_options(${TARGET_NAME} PRIVATE -gdwarf-2)
 endif()
-
-target_link_libraries(${TARGET_NAME} PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Quick
-    Qt${QT_VERSION_MAJOR}::QuickWidgets
-    Qt${QT_VERSION_MAJOR}::QuickControls2
-    Qt${QT_VERSION_MAJOR}::Svg
-)
-
-# PerFile.qml (loaded as qrc:/PerFile.qml) imports QtQuick, QtQuick.Controls and its
-# Material style, and QtQuick.Layouts. A shared Qt build resolves those QML plugins at
-# runtime, but a static Qt build has to import and link them into the executable;
-# otherwise QQuickWidget cannot instantiate the QML and the PerFile view stays empty.
-# qmake does this on its own for static builds (mkspecs/features/qt.prf runs
-# qmlimportscanner over the .qrc and generates qml_plugin_import.cpp).
-get_target_property(_qt_core_type Qt${QT_VERSION_MAJOR}::Core TYPE)
-if(_qt_core_type STREQUAL "STATIC_LIBRARY")
-    if(QT_VERSION_MAJOR EQUAL 6)
-        # Qt6 does the static-plugin equivalent for targets linking Qt::Qml on its own;
-        # this target uses plain add_executable() rather than qt_add_executable(), so the
-        # automatic finalizer never runs and this explicit call is required.
-        if(COMMAND qt_import_qml_plugins)
-            qt_import_qml_plugins(${TARGET_NAME})
-        endif()
-    else()
-        # Qt5 has no automatic equivalent, so go through its own qmlimportscanner-based
-        # CMake integration: find_package(Qt5 COMPONENTS QmlImportScanner) defines
-        # qt5_import_qml_plugins(), which scans this target's .qrc for QML files,
-        # resolves each plugin via its .prl file, and links it in.
-        find_package(Qt5 COMPONENTS QmlImportScanner QUIET)
-        if(COMMAND qt5_import_qml_plugins)
-            qt5_import_qml_plugins(${TARGET_NAME})
-        else()
-            message(FATAL_ERROR "Qt5QmlImportScanner not found; a static build will not render PerFile.qml")
-        endif()
-    endif()
-endif()
-unset(_qt_core_type)
 
 if(ENABLE_C2PA)
     target_compile_definitions(${TARGET_NAME} PRIVATE ENABLE_C2PA)
@@ -284,6 +248,36 @@ if(ENABLE_C2PA)
         target_link_libraries(${TARGET_NAME} PRIVATE c2pa_c)
     endif()
 endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::QuickWidgets
+    Qt${QT_VERSION_MAJOR}::QuickControls2
+    Qt${QT_VERSION_MAJOR}::Svg
+)
+
+# Links additional Qt plugins needed for when using a static Qt build.
+get_target_property(_qt_core_type Qt${QT_VERSION_MAJOR}::Core TYPE)
+if(_qt_core_type STREQUAL "STATIC_LIBRARY")
+    target_link_libraries(${TARGET_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::QSvgPlugin)
+
+    if(QT_VERSION_MAJOR GREATER_EQUAL 6)
+        if(COMMAND qt_import_qml_plugins)
+            qt_import_qml_plugins(${TARGET_NAME})
+        endif()
+    else()
+        find_package(Qt5 COMPONENTS QmlImportScanner QUIET)
+        if(COMMAND qt5_import_qml_plugins)
+            qt5_import_qml_plugins(${TARGET_NAME} PATH_TO_SCAN "${SOURCE_DIR}/GUI/Qt")
+        else()
+            message(FATAL_ERROR "Qt5QmlImportScanner not found; a static build will not render PerFile.qml")
+        endif()
+    endif()
+endif()
+unset(_qt_core_type)
 
 if(UNIX AND NOT APPLE)
     include(GNUInstallDirs)

@@ -15,8 +15,6 @@ version="$(<"${release_directory}/../Project/version.txt")"
 
 macosx_version_min="10.9"
 
-export MAKEOPTS=-j$(($(sysctl -n hw.logicalcpu)+1))
-
 #-----------------------------------------------------------------------
 # Cleanup
 rm -f "${release_directory}/BWFMetaEdit_CLI_${version}_Mac.dmg"
@@ -38,7 +36,7 @@ popd
 #-----------------------------------------------------------------------
 # Build bwfmetaedit
 pushd "${release_directory}/../Project/CMake/CLI"
-    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="${macosx_version_min}" -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES .
+    cmake -GNinja -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET="${macosx_version_min}" -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES .
     cmake --build build --parallel
 
     install_name_tool -add_rpath /usr/local/lib/bwfmetaedit/lib build/bwfmetaedit

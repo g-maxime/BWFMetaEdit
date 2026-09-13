@@ -13,7 +13,7 @@ endif()
 option(ENABLE_C2PA "Enable C2PA support" OFF)
 option(C2PA_DYNAMIC "Load the C2PA library dynamically at runtime" OFF)
 
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source)
+get_filename_component(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../Source" ABSOLUTE)
 
 set(HEADERS
     ${SOURCE_DIR}/CLI/CLI_Help.h

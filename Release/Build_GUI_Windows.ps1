@@ -44,7 +44,7 @@ if (-Not (Test-Path -Path "${release_directory}\..\Source\ThirdParty\c2pa-rs\tar
 #-----------------------------------------------------------------------
 # Build
 Push-Location -Path "${release_directory}\..\Project\CMake\GUI"
-    $cmake_args = @("-GNinja", "-B${arch}", "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_C2PA=YES", "-DC2PA_DYNAMIC=YES")
+    $cmake_args = @("-GNinja", "-B${arch}", "-DCMAKE_BUILD_TYPE=Release", "-DENABLE_C2PA=YES", "-DC2PA_DYNAMIC=YES", "-DWIN32_CONSOLE=YES")
     if ($runtime) {
         $cmake_args += "-DCMAKE_MSVC_RUNTIME_LIBRARY=${runtime}"
     }
