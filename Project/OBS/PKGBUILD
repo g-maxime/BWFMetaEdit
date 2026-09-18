@@ -9,7 +9,7 @@ arch=('x86_64')
 url="https://mediaarea.net/BWFMetaEdit"
 license=('GPL')
 
-makedepends=('qt6-base' 'qt6-declarative' 'qt6-svg' 'qt6-tools' 'ca-certificates' 'rust')
+makedepends=('qt6-base' 'qt6-declarative' 'qt6-svg' 'qt6-tools' 'ca-certificates' 'rust' 'cmake' 'ninja')
 source=(${pkgname}_${pkgver}.tar.xz bwfmetaedit-vendor_${pkgver}.tar.xz)
 sha256sums=('SKIP' 'SKIP')
 
@@ -20,12 +20,13 @@ prepare() {
     mkdir .cargo
     printf '[source.crates-io]\nreplace-with = "vendored-sources"\n\n[source.vendored-sources]\ndirectory = "vendor"\n' > .cargo/config.toml
 
-    cd "${srcdir}"/bwfmetaedit/Project/GNU/CLI
-    sh ./autogen
-    LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/lib/bwfmetaedit" ./configure --prefix=/usr --enable-c2pa=dynamic
+    cmake -GNinja -S"${srcdir}"/bwfmetaedit/Project/CMake/CLI -B"${srcdir}"/bwfmetaedit/Project/CMake/CLI/build \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_RPATH=/usr/lib/bwfmetaedit -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES
 
-    cd "${srcdir}"/bwfmetaedit/Project/QtCreator
-    qmake6 ENABLE_C2PA=dynamic QMAKE_RPATHDIR+=/usr/lib/bwfmetaedit BINDIR=/usr/bin
+    cmake -GNinja -S"${srcdir}"/bwfmetaedit/Project/CMake/GUI -B"${srcdir}"/bwfmetaedit/Project/CMake/GUI/build \
+        -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_RPATH=/usr/lib/bwfmetaedit -DENABLE_C2PA=YES -DC2PA_DYNAMIC=YES
 }
 
 build() {
@@ -34,18 +35,14 @@ build() {
         cargo build --release --offline --locked -p c2pa-c-ffi --no-default-features --features "rust_native_crypto, http, file_io"
     strip target/release/libc2pa_c.so
 
-    cd "${srcdir}"/bwfmetaedit/Project/GNU/CLI
-    make
-
-    cd "${srcdir}"/bwfmetaedit/Project/QtCreator
-    make
+    cmake --build "${srcdir}"/bwfmetaedit/Project/CMake/CLI/build --parallel
+    cmake --build "${srcdir}"/bwfmetaedit/Project/CMake/GUI/build --parallel
 }
 
 package_bwfmetaedit() {
     pkgdesc="${pkgdesc} (CLI)"
 
-    cd "${srcdir}"/bwfmetaedit/Project/GNU/CLI
-    make DESTDIR="${pkgdir}" install
+    DESTDIR="${pkgdir}" cmake --install "${srcdir}"/bwfmetaedit/Project/CMake/CLI/build
 
     install -D -m 0644 "${srcdir}"/bwfmetaedit/License.html "${pkgdir}"/usr/share/licenses/${pkgname}/License.html
     install -D -m 0644 "${srcdir}"/bwfmetaedit/History_CLI.txt "${pkgdir}"/usr/share/doc/${pkgname}/History.txt
@@ -64,8 +61,7 @@ package_bwfmetaedit-gui() {
     pkgdesc="${pkgdesc} (GUI)"
     depends=('qt6-base' 'qt6-declarative' 'qt6-svg')
 
-    cd "${srcdir}"/bwfmetaedit/Project/QtCreator
-    make INSTALL_ROOT="${pkgdir}" install
+    DESTDIR="${pkgdir}" cmake --install "${srcdir}"/bwfmetaedit/Project/CMake/GUI/build
 
     install -D -m 0644 "${srcdir}"/bwfmetaedit/License.html "${pkgdir}"/usr/share/licenses/${pkgname}/License.html
     install -D -m 0644 "${srcdir}"/bwfmetaedit/History_GUI.txt "${pkgdir}"/usr/share/doc/${pkgname}/History.txt
@@ -74,9 +70,9 @@ package_bwfmetaedit-gui() {
 
     install -D -m 0644 "${srcdir}"/bwfmetaedit/Source/Resource/Image/Logo/Logo128.png "${pkgdir}"/usr/share/icons/hicolor/128x128/apps/bwfmetaedit-gui.png
     install -D -m 0644 "${srcdir}"/bwfmetaedit/Source/Resource/Image/Logo/Logo128.png "${pkgdir}"/usr/share/pixmaps/bwfmetaedit-gui.png
-    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/GNU/GUI/bwfmetaedit-gui.desktop "${pkgdir}"/usr/share/applications/bwfmetaedit-gui.desktop
-    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/GNU/GUI/bwfmetaedit-gui.metainfo.xml "${pkgdir}"/usr/share/metainfo/bwfmetaedit-gui.metainfo.xml
-    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/GNU/GUI/bwfmetaedit-gui.kde3.desktop "${pkgdir}"/usr/share/apps/konqueror/servicemenus/bwfmetaedit-gui.desktop
-    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/GNU/GUI/bwfmetaedit-gui.kde4.desktop "${pkgdir}"/usr/share/kde4/services/ServiceMenus/bwfmetaedit-gui.desktop
-    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/GNU/GUI/bwfmetaedit-gui.kde4.desktop "${pkgdir}"/usr/share/kservices5/ServiceMenus/bwfmetaedit-gui.desktop
+    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/Unix/bwfmetaedit-gui.desktop "${pkgdir}"/usr/share/applications/bwfmetaedit-gui.desktop
+    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/Unix/bwfmetaedit-gui.metainfo.xml "${pkgdir}"/usr/share/metainfo/bwfmetaedit-gui.metainfo.xml
+    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/Unix/bwfmetaedit-gui.kde3.desktop "${pkgdir}"/usr/share/apps/konqueror/servicemenus/bwfmetaedit-gui.desktop
+    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/Unix/bwfmetaedit-gui.kde4.desktop "${pkgdir}"/usr/share/kde4/services/ServiceMenus/bwfmetaedit-gui.desktop
+    install -D -m 0644 "${srcdir}"/bwfmetaedit/Project/Unix/bwfmetaedit-gui.kde4.desktop "${pkgdir}"/usr/share/kservices5/ServiceMenus/bwfmetaedit-gui.desktop
 }

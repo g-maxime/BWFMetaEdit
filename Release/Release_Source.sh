@@ -41,10 +41,9 @@ pushd "${temp_directory}"
     cp -r "${release_directory}/.." BWFMetaEdit_CLI_GNU_FromSource
 
     # Script preparation
-    mv BWFMetaEdit_CLI_GNU_FromSource/Project/GNU/CLI/AddThisToRoot_CLI_compile.sh BWFMetaEdit_CLI_GNU_FromSource/CLI_Compile.sh
+    mv BWFMetaEdit_CLI_GNU_FromSource/Project/Unix/AddThisToRoot_CLI_compile.sh BWFMetaEdit_CLI_GNU_FromSource/CLI_Compile.sh
     chmod +x BWFMetaEdit_CLI_GNU_FromSource/CLI_Compile.sh
     chmod +x BWFMetaEdit_CLI_GNU_FromSource/Project/GNU/CLI/autogen.sh
-    chmod +x BWFMetaEdit_CLI_GNU_FromSource/Project/Mac/BR_extension_CLI.sh
     chmod +x BWFMetaEdit_CLI_GNU_FromSource/Project/Mac/mkdmg.sh
 
     # Autotools
@@ -60,8 +59,9 @@ pushd "${temp_directory}"
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/debian
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/MSVC2022
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/OBS
-    rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/GNU/GUI
+    rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/Unix
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/QtCreator
+    rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/CMake/GUI
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Project/Mac/*_GUI.sh
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Source/GUI
     rm -rf BWFMetaEdit_CLI_GNU_FromSource/Source/Resource
@@ -80,9 +80,8 @@ pushd "${temp_directory}"
     cp -r "${release_directory}/.." BWFMetaEdit_GUI_GNU_FromSource
 
     # Script preparation
-    mv BWFMetaEdit_GUI_GNU_FromSource/Project/QtCreator/AddThisToRoot_GUI_compile.sh BWFMetaEdit_GUI_GNU_FromSource/GUI_Compile.sh
+    mv BWFMetaEdit_GUI_GNU_FromSource/Project/Unix/AddThisToRoot_GUI_compile.sh BWFMetaEdit_GUI_GNU_FromSource/GUI_Compile.sh
     chmod +x BWFMetaEdit_GUI_GNU_FromSource/GUI_Compile.sh
-    chmod +x BWFMetaEdit_GUI_GNU_FromSource/Project/Mac/BR_extension_GUI.sh
     chmod +x BWFMetaEdit_GUI_GNU_FromSource/Project/Mac/mkdmg.sh
 
     # Remove what is not wanted
@@ -94,6 +93,7 @@ pushd "${temp_directory}"
     rm -rf BWFMetaEdit_GUI_GNU_FromSource/Project/MSVC2022
     rm -rf BWFMetaEdit_GUI_GNU_FromSource/Project/OBS
     rm -rf BWFMetaEdit_GUI_GNU_FromSource/Project/GNU/CLI
+    rm -rf BWFMetaEdit_GUI_GNU_FromSource/Project/CMake/CLI
     rm -rf BWFMetaEdit_GUI_GNU_FromSource/Project/Mac/*_CLI.sh
     rm -rf BWFMetaEdit_GUI_GNU_FromSource/Source/CLI
 
